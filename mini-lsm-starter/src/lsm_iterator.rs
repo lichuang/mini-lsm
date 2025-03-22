@@ -18,7 +18,7 @@
 use anyhow::Result;
 
 use crate::{
-    iterators::{StorageIterator, merge_iterator::MergeIterator},
+    iterators::{merge_iterator::MergeIterator, StorageIterator},
     mem_table::MemTableIterator,
 };
 

@@ -18,7 +18,7 @@
 use std::{
     collections::HashSet,
     ops::Bound,
-    sync::{Arc, atomic::AtomicBool},
+    sync::{atomic::AtomicBool, Arc},
 };
 
 use anyhow::Result;
@@ -28,7 +28,7 @@ use ouroboros::self_referencing;
 use parking_lot::Mutex;
 
 use crate::{
-    iterators::{StorageIterator, two_merge_iterator::TwoMergeIterator},
+    iterators::{two_merge_iterator::TwoMergeIterator, StorageIterator},
     lsm_iterator::{FusedIterator, LsmIterator},
     lsm_storage::LsmStorageInner,
 };

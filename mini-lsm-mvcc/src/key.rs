@@ -212,3 +212,19 @@ impl<T: AsRef<[u8]> + Ord> Ord for Key<T> {
         (self.0.as_ref(), Reverse(self.1)).cmp(&(other.0.as_ref(), Reverse(other.1)))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::KeyBytes;
+    use bytes::Bytes;
+
+    #[test]
+    fn test_compare_key() {
+        let key_a = KeyBytes::from_bytes_with_ts(Bytes::from("hello"), 1);
+        let key_b = KeyBytes::from_bytes_with_ts(Bytes::from("world"), 1);
+        let key_c = KeyBytes::from_bytes_with_ts(Bytes::from("hello"), 2);
+        assert!(key_c > key_a);
+        assert!(key_b > key_a);
+        assert!(key_c > key_b);
+    }
+}

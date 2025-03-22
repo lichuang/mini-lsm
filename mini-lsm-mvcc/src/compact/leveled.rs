@@ -80,7 +80,9 @@ impl LeveledCompactionController {
         snapshot: &LsmStorageState,
     ) -> Option<LeveledCompactionTask> {
         // step 1: compute target level size
-        let mut target_level_size = (0..self.options.max_levels).map(|_| 0).collect::<Vec<_>>(); // exclude level 0
+        // exclude level 0
+        let mut target_level_size = (0..self.options.max_levels).map(|_| 0).collect::<Vec<_>>();
+        // sum of size in each levels
         let mut real_level_size = Vec::with_capacity(self.options.max_levels);
         let mut base_level = self.options.max_levels;
         for i in 0..self.options.max_levels {
@@ -95,14 +97,18 @@ impl LeveledCompactionController {
         let base_level_size_bytes = self.options.base_level_size_mb * 1024 * 1024;
 
         // select base level and compute target level size
+        // target base level size cannot bigger than base_level_size_mb option
         target_level_size[self.options.max_levels - 1] =
             real_level_size[self.options.max_levels - 1].max(base_level_size_bytes);
         for i in (0..(self.options.max_levels - 1)).rev() {
             let next_level_size = target_level_size[i + 1];
+            // use next_level_size and options.level_size_multiplier to compute this level size
             let this_level_size = next_level_size / self.options.level_size_multiplier;
+            // only when next_level_size > base_level_size_bytes, target_level_size[i] > 0
             if next_level_size > base_level_size_bytes {
                 target_level_size[i] = this_level_size;
             }
+            // record the min i that target_level_size[i] > 0
             if target_level_size[i] > 0 {
                 base_level = i + 1;
             }
@@ -124,6 +130,7 @@ impl LeveledCompactionController {
             });
         }
 
+        // the most priority of compact level is the biggest ratio real_level_size/target_level_size level
         let mut priorities = Vec::with_capacity(self.options.max_levels);
         for level in 0..self.options.max_levels {
             let prio = real_level_size[level] as f64 / target_level_size[level] as f64;
